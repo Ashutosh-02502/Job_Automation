@@ -1,4 +1,4 @@
-FROM ghcr.io/puppeteer/puppeteer:21.6.1
+FROM ghcr.io/puppeteer/puppeteer:24.10.2
 
 # Set working directory
 WORKDIR /usr/src/app

@@ -116,13 +116,13 @@ export class NaukriService extends BrowserService {
       await this.safeClick(SELECTORS.PROFILE.ICON, 'Profile icon');
       
       // Wait for menu animation
-      await this.page.waitForTimeout(3000);
+      await this.wait(3000);
       
       // Navigate to profile details
       await this.safeClick(SELECTORS.PROFILE.USER_IMG, 'Profile section');
       
       // Wait for profile page load
-      await this.page.waitForTimeout(5000);
+      await this.wait(5000);
 
       // Verify resume upload section
       const uploadContainer = await this.waitForElement(SELECTORS.PROFILE.RESUME_CONTAINER);
@@ -144,7 +144,7 @@ export class NaukriService extends BrowserService {
       }
 
       // Wait for upload to process
-      await this.page.waitForTimeout(5000);
+      await this.wait(5000);
 
       // Click the update button with exact selector
       const updateSuccess = await this.safeClick(
@@ -158,7 +158,7 @@ export class NaukriService extends BrowserService {
       }
 
       // Wait for upload confirmation
-      await this.page.waitForTimeout(5000);
+      await this.wait(5000);
       
       // Verify upload success
       const uploadStatus = await this.page.evaluate(() => {
@@ -188,7 +188,7 @@ export class NaukriService extends BrowserService {
       await this.safeClick('img.nI-gNb-icon-img', 'Profile menu');
       
       // Wait for menu with increased timeout
-      await this.page.waitForTimeout(3000);
+      await this.wait(3000);
       
       // Try multiple selectors for logout
       const logoutSuccess = await this.page.evaluate(async () => {
@@ -216,10 +216,10 @@ export class NaukriService extends BrowserService {
       }
       
       // Wait for logout to complete
-      await this.page.waitForTimeout(5000);
+      await this.wait(5000);
       
       // Wait for page to load after logout
-      await this.page.waitForTimeout(5000); // 5 seconds should be enough
+      await this.wait(5000); // 5 seconds should be enough
       
       // Verify logout by checking for login page elements
       try {

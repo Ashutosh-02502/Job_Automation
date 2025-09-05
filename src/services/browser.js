@@ -21,11 +21,17 @@ const BROWSER_OPTIONS = {
     '--disable-gpu',
     '--disable-blink-features=AutomationControlled',
     '--disable-web-security',
-    '--disable-features=IsolateOrigins,site-per-process'
+    '--disable-features=IsolateOrigins,site-per-process',
+    '--window-size=1920,1080'
   ],
-  defaultViewport: { width: 1920, height: 1080 },
+  defaultViewport: { 
+    width: 1920, 
+    height: 1080,
+    deviceScaleFactor: 1
+  },
   executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null, // For Docker compatibility
-  ignoreHTTPSErrors: true // Handle SSL issues in different environments
+  ignoreHTTPSErrors: true, // Handle SSL issues in different environments
+  protocolTimeout: 60000 // Increase protocol timeout
 };
 
 export class BrowserService {
@@ -103,9 +109,17 @@ export class BrowserService {
    */
   async safeClick(selector, description = '') {
     try {
-      await this.page.waitForSelector(selector, { visible: true });
+      await this.page.waitForSelector(selector, { visible: true, timeout: 10000 });
+      await this.page.waitForFunction(
+        (sel) => {
+          const element = document.querySelector(sel);
+          return element && element.clientHeight > 0 && element.clientWidth > 0;
+        },
+        { timeout: 5000 },
+        selector
+      );
       await this.page.click(selector);
-      await new Promise(resolve => setTimeout(resolve, config.automation.waitTime));
+      await this.wait(config.automation.waitTime);
       logger.info(`Clicked: ${description || selector}`);
       return true;
     } catch (error) {
@@ -124,14 +138,14 @@ export class BrowserService {
    */
   async safeType(selector, text, description = '') {
     try {
-      await this.page.waitForSelector(selector, { visible: true });
+      await this.page.waitForSelector(selector, { visible: true, timeout: 10000 });
       await this.page.click(selector);
       // Clear existing text
       await this.page.keyboard.down('Control');
       await this.page.keyboard.press('KeyA');
       await this.page.keyboard.up('Control');
       await this.page.type(selector, text);
-      await new Promise(resolve => setTimeout(resolve, config.automation.waitTime));
+      await this.wait(config.automation.waitTime);
       logger.info(`Typed in: ${description || selector}`);
       return true;
     } catch (error) {
@@ -186,7 +200,7 @@ export class BrowserService {
       await this.page.waitForSelector(selector);
       const input = await this.page.$(selector);
       await input.uploadFile(filePath);
-      await this.page.waitForTimeout(config.automation.waitTime * 2);
+      await this.wait(config.automation.waitTime * 2);
       logger.info(`File uploaded: ${description || selector}`);
       return true;
     } catch (error) {
