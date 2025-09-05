@@ -1,0 +1,7 @@
+node_modules
+.env
+.vscode/
+logs/*
+!logs/.gitkeep
+screenshots/*
+!screenshots/.gitkeep

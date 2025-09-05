@@ -1,0 +1,24 @@
+{
+  "name": "job-automation-agent",
+  "version": "1.0.0",
+  "description": "Automated job profile management for Naukri and Instahyre",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "test": "node test.js",
+    "install-browser": "npx puppeteer browsers install chrome",
+    "postinstall": "npx puppeteer browsers install chrome",
+    "docker-start": "node index.js",
+    "validate": "node -e \"require('./src/config/config.js').validateConfig()\"",
+    "prestart": "npm run validate",
+    "health-check": "node -e \"require('./src/utils/logger.js').logger.info('Health check passed')\""
+  },
+  "dependencies": {
+    "puppeteer": "^21.6.1",
+    "node-cron": "^3.0.3",
+    "dotenv": "^16.3.1",
+    "winston": "^3.11.0"
+  }
+}
