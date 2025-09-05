@@ -1,22 +1,27 @@
 FROM ghcr.io/puppeteer/puppeteer:24.10.2
 
-# Set working directory
+# Create app directory and set permissions
+USER root
+RUN mkdir -p /usr/src/app && chown -R pptruser:pptruser /usr/src/app
 WORKDIR /usr/src/app
 
 # Set environment variable to indicate we're in Docker
 ENV RUNNING_IN_DOCKER=true
 
-# Copy package files
-COPY package*.json ./
+# Switch to pptruser for all subsequent operations
+USER pptruser
+
+# Create necessary directories with correct ownership
+RUN mkdir -p /usr/src/app/logs /usr/src/app/screenshots /usr/src/app/resume
+
+# Copy package files with correct ownership
+COPY --chown=pptruser:pptruser package*.json ./
 
 # Install dependencies
 RUN npm ci
 
-# Create necessary directories
-RUN mkdir -p /usr/src/app/logs /usr/src/app/screenshots /usr/src/app/resume
-
-# Copy project files
-COPY . .
+# Copy project files with correct ownership
+COPY --chown=pptruser:pptruser . .
 
 # Handle resume file with error checking
 RUN if [ -f "AshutoshResume.pdf" ]; then \
@@ -31,22 +36,16 @@ RUN if [ -f "AshutoshResume.pdf" ]; then \
         exit 1; \
     fi
 
-# Set correct permissions
-RUN chown -R pptruser:pptruser /usr/src/app
-
 # Double verify resume file exists and is readable
 RUN ls -la /usr/src/app/resume/AshutoshResume.pdf || (echo "Resume file not found" && exit 1)
-RUN mkdir -p logs screenshots
 
 # Set environment variables
 ENV NODE_ENV=production \
     PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     HEADLESS_MODE=true
 
-# Copy docker environment file
-COPY .env.docker /usr/src/app/.env
-
-# Set permissions
+# Copy docker environment file with correct ownership
+COPY --chown=pptruser:pptruser .env.docker /usr/src/app/.env
 RUN chmod 644 /usr/src/app/.env
 
 # Start the application
