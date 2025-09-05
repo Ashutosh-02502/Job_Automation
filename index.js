@@ -17,15 +17,38 @@ async function createDirectories() {
 async function startHealthCheck() {
   const interval = 5 * 60 * 1000; // 5 minutes
   
-  // Create a basic HTTP server for Render health checks
-  if (process.env.NODE_ENV === 'production') {
-    const http = await import('http');
-    const server = http.createServer((req, res) => {
-      res.writeHead(200);
-      res.end('OK');
+  // Create an Express server for Render health checks
+  if (process.env.NODE_ENV === 'production' || process.env.RENDER) {
+    const express = (await import('express')).default;
+    const app = express();
+    
+    // Health check endpoint
+    app.get('/', (req, res) => {
+      res.status(200).json({
+        status: 'ok',
+        message: 'Service is running',
+        timestamp: new Date().toISOString()
+      });
     });
-    server.listen(process.env.PORT || 3000);
-    logger.info(`Health check server listening on port ${process.env.PORT || 3000}`);
+
+    // Metrics endpoint
+    app.get('/metrics', (req, res) => {
+      const memoryUsage = process.memoryUsage();
+      res.status(200).json({
+        status: 'ok',
+        metrics: {
+          rss: `${Math.round(memoryUsage.rss / 1024 / 1024)}MB`,
+          heapTotal: `${Math.round(memoryUsage.heapTotal / 1024 / 1024)}MB`,
+          heapUsed: `${Math.round(memoryUsage.heapUsed / 1024 / 1024)}MB`
+        },
+        timestamp: new Date().toISOString()
+      });
+    });
+
+    const port = process.env.PORT || 3000;
+    app.listen(port, '0.0.0.0', () => {
+      logger.info(`Health check server listening on port ${port}`);
+    });
   }
 
   setInterval(() => {
@@ -47,6 +70,9 @@ async function main() {
   try {
     // Create necessary directories
     await createDirectories();
+
+    // Start health check server
+    await startHealthCheck();
 
     logger.info('Job Automation Agent Starting...');
     logger.info('='.repeat(50));
