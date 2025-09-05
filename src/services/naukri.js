@@ -66,7 +66,7 @@ export class NaukriService extends BrowserService {
       if (!loginSuccess) throw new Error('Failed to click login button');
       
       // Wait for potential CAPTCHA or error messages
-      await this.page.waitForTimeout(2000);
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
       // Check for CAPTCHA
       const hasCaptcha = await this.page.evaluate(() => {
@@ -79,7 +79,7 @@ export class NaukriService extends BrowserService {
       }
 
       // Wait for navigation and profile image to appear
-      await this.page.waitForTimeout(8000); // Increased wait time for page load
+      await this.wait(8000); // Increased wait time for page load
 
       // Check for login success by looking for the profile image
       const isLoggedIn = await this.page.evaluate(() => {

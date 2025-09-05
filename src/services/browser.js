@@ -34,6 +34,10 @@ export class BrowserService {
     this.page = null;
   }
 
+  async wait(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
   async initialize() {
     try {
       // Launch browser with configuration
@@ -101,7 +105,7 @@ export class BrowserService {
     try {
       await this.page.waitForSelector(selector, { visible: true });
       await this.page.click(selector);
-      await this.page.waitForTimeout(config.automation.waitTime);
+      await new Promise(resolve => setTimeout(resolve, config.automation.waitTime));
       logger.info(`Clicked: ${description || selector}`);
       return true;
     } catch (error) {
@@ -127,7 +131,7 @@ export class BrowserService {
       await this.page.keyboard.press('KeyA');
       await this.page.keyboard.up('Control');
       await this.page.type(selector, text);
-      await this.page.waitForTimeout(config.automation.waitTime);
+      await new Promise(resolve => setTimeout(resolve, config.automation.waitTime));
       logger.info(`Typed in: ${description || selector}`);
       return true;
     } catch (error) {
